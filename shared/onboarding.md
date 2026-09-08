@@ -25,12 +25,22 @@ Do your best to fill every section from the repository before asking anything. U
 | **Tickets, branches, commits** | `git log --format=%s -n 200` (bracketed / prefixed keys like `[PROJ-123]`, `PROJ-123:`, `feat(scope):`); `git branch -r` (naming pattern); PR titles via `gh pr list --limit 50 --json title,headRefName`; `.gitmessage`; commitlint / conventional-commits config |
 | **Gates** — build/test/lint/typecheck per area | CI workflows (`.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/`); `Makefile`, `justfile`, `Taskfile.yml`; `package.json` scripts; `pyproject.toml` / `tox.ini` / `noxfile.py`; `pre-commit` config; `Cargo.toml`; language-specific test dirs |
 | **Local environment** | `docker-compose*.yml`, `Tiltfile`, `skaffold.yaml`, `devcontainer.json`, `Procfile`, `.env.example`, README "getting started" section |
-| **Pull requests** | `gh repo view --json nameWithOwner,defaultBranchRef,mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed,autoMergeAllowed`; `gh api repos/<slug>/branches/<default>/protection` (may 403 — that's fine, record "unknown"); `gh label list`; `.github/PULL_REQUEST_TEMPLATE.md`; presence of bot reviewers in recent PRs (`gh pr view <n> --json reviews`) — Copilot, CodeRabbit, etc.; `.github/CODEOWNERS` |
+| **Pull requests** | `gh repo view --json nameWithOwner,defaultBranchRef,mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed,pullRequestTemplates`; `gh api repos/<slug> --jq '{allow_auto_merge, delete_branch_on_merge}'`; `gh api repos/<slug>/branches/<default>/protection` (may 403 — that's fine, record "unknown"); `gh label list`; `.github/PULL_REQUEST_TEMPLATE.md`; presence of bot reviewers in recent PRs (`gh pr view <n> --json reviews`) — Copilot, CodeRabbit, etc.; `.github/CODEOWNERS` |
 | **Risk tiers** | `CODEOWNERS` (required reviewers per path), paths containing `auth`, `payment`, `billing`, `migration`, `infra`, `terraform`, `.github`; paths named `experimental`, `sandbox`, `playground`, `skills` |
 | **Autonomous sessions** | Which agent CLIs are installed (`command -v claude codex opencode cursor-agent`); existing `specs/*-prompt.md` files; README mentions of loops |
 | **Reference implementations** | Directories named `legacy`, `old`, `v1`, `-java`, `-python` alongside a newer sibling; README migration notes |
 
-Record **where** each inferred value came from (a path or command) so the user can sanity-check it quickly.
+Keep track of **where** each inferred value came from (a path or command) so you can cite it in a Step 2 question; in the written file, cite sources only for non-obvious values (Step 3).
+
+Committed repo guidance (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`) outranks your harness's ambient defaults whenever they conflict — for example on commit trailers or merge method. Record the repo's rule.
+
+Three rules for judging what you find:
+
+- **Stale-but-present sources.** Repos accumulate superseded setup docs, old CI READMEs, and abandoned tool configs. When two sources disagree, prefer the one with the most recent commit (`git log -1 --format=%cs -- <path>`), and prefer what CI actually runs over what docs say. Record superseded sources on a `Stale, do not follow:` line in the relevant section so the next agent doesn't rediscover them.
+- **Commands that exist vs commands that gate.** A test job that is `continue-on-error`, `allow_failure`, or not in the required status checks is advisory, not blocking. Mark advisory gates as such in the `Gates` table notes and name the blocking set on the `Blocking in CI:` line.
+- **Granularity.** Cap the `Areas` table at about ten rows: one per deployable service or app, plus one row each for `db`, cloud infra, local infra, and tests. Fold everything else into an `other` row rather than listing every directory that carries a manifest.
+
+Subagents are worth it for the CI-workflow sweep and for repos with more than about five areas; for everything else, direct `grep`/`sed`/`ls` is faster than delegation.
 
 ## Step 2 — Ask only what's left
 
@@ -51,6 +61,8 @@ Questions that commonly survive inference:
 
 Do not ask about anything the current skill will not use.
 
+**Conservative defaults when the user can't confirm.** Risk tiers: any production service, customer-facing app, infrastructure, migration, CI, or auth/payment/PII code is **mission-critical** until a human says otherwise; only paths explicitly marked no-review (experimental dirs, agent skills, docs) default to near-zero. Automerge: off. Merge method: whatever the repo settings allow, preferring squash. Never lower a tier because you couldn't find evidence for it.
+
 ## Step 3 — Write the file
 
 Write `.agents/workflow-context.md` from the template below. Rules:
@@ -59,7 +71,8 @@ Write `.agents/workflow-context.md` from the template below. Rules:
 - Fill every field; use `none` for a deliberate absence and `TODO` for unknowns the user chose to skip.
 - Use paths relative to the repo root.
 - Put a one-line `<!-- source: … -->` comment after inferred values that came from a non-obvious place.
-- Keep it under ~150 lines. It is read at the start of every skill invocation.
+- Keep it under ~150 lines for a single project, ~200 for a large monorepo. It is read at the start of every skill invocation, so terse tables beat prose.
+- You may append one extra section, `## Unconfirmed`, listing inferences a human still needs to check. Skills ignore it; the next onboarding run should try to resolve it.
 
 Then show the user a five-line summary of what was written and recommend committing the file so the team (and every agent) shares one set of conventions. If the repo has an `AGENTS.md` or `CLAUDE.md`, suggest adding the line: `Workflow conventions for agent skills live in .agents/workflow-context.md.`
 
@@ -97,7 +110,9 @@ Then show the user a five-line summary of what was written and recommend committ
   | api | — | `uv run pytest tests/unit` | `ruff check . && ruff format --check .` | `ty check src` |
   | web | `pnpm build` | `pnpm test` | `pnpm lint` | `pnpm typecheck` |
 - Full suite: `make test`
+- Blocking in CI: api unit tests, web build + typecheck (everything else is advisory)
 - Known CI/local drift: none
+- Stale, do not follow: none
 
 ## Local Environment
 - Start: `docker compose up`
