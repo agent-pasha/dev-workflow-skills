@@ -12,10 +12,23 @@ Agent skills for the loop that actually ships features: **research → plan → 
 
 ```
 research-document ──▶ implementation-plan ──▶ create-ralph-prompt ──▶ (loop runs) ──▶ pr-train
-      specs/X-research.md      specs/X-todo.md        specs/X-prompt.md                  N small PRs
+      specs/X-research.md      specs/X-todo.md   │    specs/X-prompt.md                  N small PRs
+                                                 └──▶ (orchestrating agent works the plan
+                                                       with subagent implementors) ──────▶ pr-train
 ```
 
 Each skill also stands alone. Use `pr-train` on any branch, `research-document` before any refactor.
+
+## Why these exist
+
+I built these to automate the parts of my daily work that kept hurting when handing real features to coding agents:
+
+- **Stale context.** An `AGENTS.md` written months ago quietly becomes wrong, and an agent that trusts it produces confidently broken work. Dex Horthy's talks on context engineering (the [12-factor agents](https://github.com/humanlayer/12-factor-agents) material and his "advanced context engineering for coding agents" talk) convinced me that fresh, task-scoped context beats a big evergreen doc. `research-document` exists for that: it writes documentation *for the current task* that reflects the product as it is right now, with file:line references, so planning starts from truth instead of memory.
+- **Autonomous execution that needs babysitting.** Geoffrey Huntley's [Ralph loops](https://ghuntley.com/ralph/) — one task per fresh session, repeat — work well, but writing the session prompt and a plan with a proper progress tracker got tiring to do by hand every time. `implementation-plan` and `create-ralph-prompt` are that work, packaged.
+- **Flooding the team's PR backlog.** A feature built end-to-end by an agent is a POC, not a PR. Splitting it into digestible, cold-reviewable chunks and pacing them so the team is never staring at fifteen open PRs is what `pr-train` does, including driving the sequence to merge one PR at a time.
+- **PR descriptions that don't help.** On my team, an open PR carries an implicit claim: it was exercised on a complete local environment that mirrors production, not just unit-tested. The description has to say the purpose, where a reviewer should focus, and exactly how it was tested locally. That's what lets us trust generated code. Your team's bar may differ, which is what the onboarding step is for.
+
+**How I use them today.** I still start with `research-document` and `implementation-plan`, but I rarely run ralph loops any more. Instead I hand the finished plan to a strong orchestrating agent and let it work through the plan with subagent implementors, deciding itself what can run in parallel and what has to be sequential. `create-ralph-prompt` stays in the collection for when a fully unattended loop is the right tool.
 
 ## Install (one command)
 

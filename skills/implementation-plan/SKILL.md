@@ -154,9 +154,11 @@ Link these from the main todo document.
 Show the user:
 - Total task count and phase breakdown
 - Any assumptions made during planning
-- How to execute it: the recommended path is the `create-ralph-prompt` skill, which turns this todo into a self-contained session prompt and gives the loop command for the repo's agent CLI. (If Claude Code's ralph-loop plugin is installed, `/ralph-loop "Work through specs/{topic}-todo.md tasks in order. Mark each [x] when done." --completion-promise "All tasks complete"` also works.)
+- How to execute it — offer both:
+  - **Orchestrated (default when the current agent supports subagents).** The current agent works through the plan itself: dispatch each task or section to an implementor subagent, run independent sections in parallel and dependent ones in sequence, require each subagent to report its verification output, and update the todo's checkboxes and Progress Summary as tasks land. Keep the plan file as the single source of truth so a later session can pick up where this one stopped.
+  - **Unattended loop.** The `create-ralph-prompt` skill turns this todo into a self-contained session prompt and gives the loop command for the repo's agent CLI: one fresh session per task until the tracker is empty. (If Claude Code's ralph-loop plugin is installed, `/ralph-loop "Work through specs/{topic}-todo.md tasks in order. Mark each [x] when done." --completion-promise "All tasks complete"` also works.)
 
-Ask if any tasks need adjustment before starting the loop.
+Ask if any tasks need adjustment before execution starts.
 
 ## Principles
 
