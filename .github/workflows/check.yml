@@ -1,0 +1,36 @@
+name: check
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shared onboarding copies are in sync
+        run: scripts/sync-shared.sh --check
+
+      - name: Every skill has frontmatter with name + description
+        run: |
+          set -e
+          for f in skills/*/SKILL.md; do
+            head -1 "$f" | grep -qx -- '---' || { echo "$f: missing frontmatter"; exit 1; }
+            grep -q '^name: ' "$f" || { echo "$f: missing name"; exit 1; }
+            grep -q '^description:' "$f" || { echo "$f: missing description"; exit 1; }
+            dir=$(basename "$(dirname "$f")")
+            grep -q "^name: $dir\$" "$f" || { echo "$f: name must equal directory ($dir)"; exit 1; }
+          done
+
+      - name: Installer works from a local checkout
+        run: |
+          set -e
+          ./install.sh --source . --dest "$RUNNER_TEMP/skills"
+          for d in skills/*/; do test -f "$RUNNER_TEMP/skills/$(basename "$d")/SKILL.md"; done
+          mkdir -p "$RUNNER_TEMP/proj" && cd "$RUNNER_TEMP/proj"
+          "$GITHUB_WORKSPACE/install.sh" --source "$GITHUB_WORKSPACE"
+          test -f .agents/skills/pr-train/SKILL.md
+          test -L .claude/skills/pr-train && test -f .claude/skills/pr-train/SKILL.md
+          test -L .codex/skills/pr-train && test -f .codex/skills/pr-train/SKILL.md
