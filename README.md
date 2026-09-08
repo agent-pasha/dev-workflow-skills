@@ -13,8 +13,8 @@ Agent skills for the loop that actually ships features: **research → plan → 
 ```
 research-document ──▶ implementation-plan ──▶ create-ralph-prompt ──▶ (loop runs) ──▶ pr-train
       specs/X-research.md      specs/X-todo.md   │    specs/X-prompt.md                  N small PRs
-                                                 └──▶ (orchestrating agent works the plan
-                                                       with subagent implementors) ──────▶ pr-train
+                                                 └──▶ (Fable orchestrates the plan with
+                                                       Opus subagents as implementors) ──▶ pr-train
 ```
 
 Each skill also stands alone. Use `pr-train` on any branch, `research-document` before any refactor.
@@ -28,7 +28,7 @@ I built these to automate the parts of my daily work that kept hurting when hand
 - **Flooding the team's PR backlog.** A feature built end-to-end by an agent is a POC, not a PR. Splitting it into digestible, cold-reviewable chunks and pacing them so the team is never staring at fifteen open PRs is what `pr-train` does, including driving the sequence to merge one PR at a time.
 - **PR descriptions that don't help.** On my team, an open PR carries an implicit claim: it was exercised on a complete local environment that mirrors production, not just unit-tested. The description has to say the purpose, where a reviewer should focus, and exactly how it was tested locally. That's what lets us trust generated code. Your team's bar may differ, which is what the onboarding step is for.
 
-**How I use them today.** I still start with `research-document` and `implementation-plan`, but I rarely run ralph loops any more. Instead I hand the finished plan to a strong orchestrating agent and let it work through the plan with subagent implementors, deciding itself what can run in parallel and what has to be sequential. `create-ralph-prompt` stays in the collection for when a fully unattended loop is the right tool.
+**How I use them today.** I still start with `research-document` and `implementation-plan`, but I rarely run ralph loops any more. Instead I hand the finished plan to Claude Fable and let it orchestrate: Fable works through the plan with Opus subagents as implementors, deciding itself what can run in parallel and what has to be sequential. `create-ralph-prompt` stays in the collection for when a fully unattended loop is the right tool.
 
 ## Install (one command)
 
