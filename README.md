@@ -10,11 +10,15 @@ Agent skills for the loop that actually ships features: **research → plan → 
 | [`pr-train`](skills/pr-train/SKILL.md) | Splits a finished feature into <500-LOC PRs, writes high-signal descriptions, and can drive the whole train through review and merge one PR at a time — with guardrails. |
 | [`workflow-onboarding`](skills/workflow-onboarding/SKILL.md) | Runs the onboarding step on demand: infers your repo's conventions, asks only what's left, writes `.agents/workflow-context.md`. |
 
-```
-research-document ──▶ implementation-plan ──▶ create-ralph-prompt ──▶ (loop runs) ──▶ pr-train
-      specs/X-research.md      specs/X-todo.md   │    specs/X-prompt.md                  N small PRs
-                                                 └──▶ (Fable orchestrates the plan with
-                                                       Opus subagents as implementors) ──▶ pr-train
+```mermaid
+flowchart LR
+    R[research-document] -->|specs/X-research.md| P[implementation-plan]
+    P -->|specs/X-todo.md| C[create-ralph-prompt]
+    C -->|specs/X-prompt.md| L[Unattended loop<br/>one task per session]
+    P -->|specs/X-todo.md| O[Fable orchestrates<br/>Opus subagents implement]
+    L --> T[pr-train]
+    O --> T
+    T -->|N small PRs, one open at a time| M([main])
 ```
 
 Each skill also stands alone. Use `pr-train` on any branch, `research-document` before any refactor.
