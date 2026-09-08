@@ -7,7 +7,7 @@ Agent skills for the loop that actually ships features: **research → plan → 
 | [`research-document`](skills/research-document/SKILL.md) | Fans out subagents to document how a system *currently* works, then synthesizes one research doc with file:line references and a gap analysis. |
 | [`implementation-plan`](skills/implementation-plan/SKILL.md) | Turns a research doc (or a fresh codebase scout) into a phased todo list of atomic tasks, each with concrete verification steps. |
 | [`create-ralph-prompt`](skills/create-ralph-prompt/SKILL.md) | Writes a self-contained session prompt (plus a tracker for ad-hoc goals) for a one-task-per-session autonomous loop, and gives you the loop command. |
-| [`pr-train`](skills/pr-train/SKILL.md) | Splits a finished feature into <500-LOC PRs, writes high-signal descriptions, and can drive the whole train through review and merge one PR at a time — with guardrails. |
+| [`pr-train`](skills/pr-train/SKILL.md) | Splits a finished feature into <500-LOC PRs, writes high-signal descriptions, and can drive the whole train through review and merge — sequentially, or as a native [GitHub stacked PR](https://docs.github.com/en/pull-requests/get-started/stacked-prs-quickstart) chain via `gh stack` — with guardrails. |
 | [`workflow-onboarding`](skills/workflow-onboarding/SKILL.md) | Runs the onboarding step on demand: infers your repo's conventions, asks only what's left, writes `.agents/workflow-context.md`. |
 
 ```mermaid
@@ -18,7 +18,7 @@ flowchart LR
     P -->|specs/X-todo.md| O[Fable orchestrates<br/>Opus subagents implement]
     L --> T[pr-train]
     O --> T
-    T -->|N small PRs, one open at a time| M([main])
+    T -->|N small PRs| M([main])
 ```
 
 Each skill also stands alone. Use `pr-train` on any branch, `research-document` before any refactor.
@@ -127,7 +127,8 @@ What the file captures:
 ## Requirements
 
 - An agent that supports `SKILL.md` skills (Claude Code, Codex, Cursor, OpenCode, …).
-- `git`, and for `pr-train`: the [GitHub CLI](https://cli.github.com/) (`gh`), optionally with `gh extension install github/gh-stack` for stacked PRs.
+- `git`, and for `pr-train`: the [GitHub CLI](https://cli.github.com/) (`gh`).
+- For stacked PR chains, `pr-train` drives GitHub's native [stacked pull requests](https://docs.github.com/en/pull-requests/get-started/stacked-prs-quickstart) through the `gh stack` extension. Install it with `gh extension install github/gh-stack`, and consider adding a dedicated gh-stack skill so your agent knows the extension's non-interactive flags and conflict recovery; `pr-train` defers to it when present.
 - Subagent support in your agent makes `research-document` and `implementation-plan` much faster, but both fall back to sequential investigation.
 
 ## Contributing

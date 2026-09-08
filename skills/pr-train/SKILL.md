@@ -75,7 +75,7 @@ This pacing is deliberate. It keeps the PR queue manageable and gives _you_ time
 
 Use only when chunk N+1 genuinely needs code from chunk N to compile or test, but each branch can still pass CI on its own merged state.
 
-The chain is a GitHub **stack**: every branch has one PR based on the branch below it, GitHub shows reviewers only that layer's diff, and after a bottom PR squash-merges the layers above are retargeted and rebased for you. The `gh stack` CLI drives it — see `gh stack --help` (or a dedicated gh-stack skill, if you have one) for command details, non-interactive flags, exit codes, and conflict recovery. This section covers only what this skill adds on top.
+The chain is a GitHub **stack** ([stacked pull requests quickstart](https://docs.github.com/en/pull-requests/get-started/stacked-prs-quickstart)): every branch has one PR based on the branch below it, GitHub shows reviewers only that layer's diff, and after a bottom PR squash-merges the layers above are retargeted and rebased for you. The `gh stack` CLI drives it — see `gh stack --help` (or a dedicated gh-stack skill, if you have one) for command details, non-interactive flags, exit codes, and conflict recovery. This section covers only what this skill adds on top.
 
 1. **Set up once:** `gh extension install github/gh-stack` and `git config rerere.enabled true`.
 2. **Build the stack bottom-up** while cutting chunks — `gh stack init <chunk-1-branch>`, commit, `gh stack add <chunk-2-branch>`, commit, and so on. Branch names follow [Branch Naming](#branch-naming). Put foundational work at the bottom.
