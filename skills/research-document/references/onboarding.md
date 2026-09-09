@@ -21,7 +21,8 @@ Do your best to fill every section from the repository before asking anything. U
 | Section | Where to look |
 |---|---|
 | **Repository** — kind, default branch, areas | Root listing; `git symbolic-ref refs/remotes/origin/HEAD`; workspace manifests (`pnpm-workspace.yaml`, `package.json` workspaces, `go.work`, `Cargo.toml` workspace, `pyproject.toml`, `settings.gradle`, `pom.xml` modules); `CODEOWNERS`; top-level directories that contain their own manifest |
-| **Specs & docs** | Existing `specs/`, `docs/`, `design/`, `rfcs/`, `adr/` dirs; `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules` |
+| **Specs & docs** | Existing `specs/`, `docs/`, `design/`, `rfcs/`, `adr/` dirs; `README.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`, `.cursorrules`; where decisions are recorded (`docs/adr`, `docs/decisions`, tracker documents) — ask if nothing in-tree |
+| **Agent identity** | `gh api user --jq .login` (the login this agent's `gh` replies as) |
 | **Tickets, branches, commits** | `git log --format=%s -n 200` (bracketed / prefixed keys like `[PROJ-123]`, `PROJ-123:`, `feat(scope):`); `git branch -r` (naming pattern); PR titles via `gh pr list --limit 50 --json title,headRefName`; `.gitmessage`; commitlint / conventional-commits config |
 | **Gates** — build/test/lint/typecheck per area | CI workflows (`.github/workflows/*.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/`); `Makefile`, `justfile`, `Taskfile.yml`; `package.json` scripts; `pyproject.toml` / `tox.ini` / `noxfile.py`; `pre-commit` config; `Cargo.toml`; language-specific test dirs |
 | **Local environment** | `docker-compose*.yml`, `Tiltfile`, `skaffold.yaml`, `devcontainer.json`, `Procfile`, `.env.example`, README "getting started" section |
@@ -96,6 +97,7 @@ Then show the user a five-line summary of what was written and recommend committ
 ## Specs & Docs
 - Specs directory: specs/
 - Read first: README.md, docs/architecture.md
+- Decisions & knowledge base: none | docs/adr/, tracker documents tagged [KB] (where review dismissals should be grounded)
 
 ## Tickets, Branches, Commits
 - Tracker: Linear | Jira | GitHub Issues | none
@@ -144,4 +146,5 @@ Then show the user a five-line summary of what was written and recommend committ
 - Non-interactive run: `cat <prompt> | claude --dangerously-skip-permissions -p`
 - Subagent budget: 5 (simple) / 20 (large investigation)
 - Reference implementations: none | legacy/ (Java service being replaced by services/api)
+- Agent GitHub login: <login the agent replies as on PRs, from `gh api user --jq .login`; used to skip threads it already answered>
 ```

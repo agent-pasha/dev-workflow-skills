@@ -63,7 +63,7 @@ These three choose how to **split** a train. To **drive** a sequential train to 
 2. **Stash or branch off the rest.** Cut `feature/<ticket>/<chunk-1>` (or whatever the context file's branch naming says) from `main` with only chunk 1's changes.
 3. **Self-review the chunk's diff.** `git diff main...HEAD` — would you approve this? Fix anything you'd comment on.
 4. **Open the PR** with a [compliant description](#pr-description-requirements) and the repo's scope labels, if it uses them. Mark draft if local QA isn't done; mark `Ready to review` once it is.
-5. **Address review comments** — with your PR-comment triage skill if you have one, otherwise by hand — whatever the count.
+5. **Address review comments** with the `address-pr-comments` skill — whatever the count.
 6. **Request review, get approval, merge.**
 7. **Rebase your remaining work onto updated `main`** and repeat for chunk 2.
 
@@ -125,7 +125,7 @@ Silence is not progress. If a PR stalls — CI never greens, a required approval
 
 ### Event handling
 
-**Review comments → triage every one, whatever the count.** Whenever review comments land — inline or top-level, bot or human, one or many — run the triage flow: classify each comment (valid fix / dismiss with a stated reason / needs clarification), implement the fixes, run the lint/format/type gates, reply on each thread, and propagate the change up the stack. If you have a PR-comment triage skill (e.g. `/address-pr-comments`), invoke it rather than re-deriving that flow inline. Don't wait for a batch — it's the comment path for a single comment too. The rest of the event space — CI, merge-state, conflicts — you handle directly:
+**Review comments → triage every one, whatever the count.** Whenever review comments land — inline or top-level, bot or human, one or many — run the triage flow: classify each comment (valid fix / dismiss with a stated reason / needs clarification), implement the fixes, run the lint/format/type gates, reply on each thread, and propagate the change up the stack. Invoke the `address-pr-comments` skill from this collection rather than re-deriving that flow inline. Don't wait for a batch — it's the comment path for a single comment too. The rest of the event space — CI, merge-state, conflicts — you handle directly:
 
 | Event | Response |
 |---|---|
