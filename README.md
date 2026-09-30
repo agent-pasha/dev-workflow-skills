@@ -113,12 +113,12 @@ What the file captures:
 
 | Section | Used by |
 |---|---|
-| Repository — monorepo areas and paths | research-document, implementation-plan, project-lead |
+| Repository — monorepo areas and paths, the worktree directory | research-document, implementation-plan, project-lead |
 | Specs & Docs — where research/plans/prompts go, where decisions and the knowledge base live | all |
 | Tickets, Branches, Commits — key format, naming, trailers | pr-train, create-ralph-prompt, address-pr-comments, project-lead |
 | Gates — build/test/lint/typecheck per area | pr-train, implementation-plan, create-ralph-prompt, address-pr-comments, project-lead |
-| Local Environment — start command, how to verify each change type, shared or per-worktree | implementation-plan, create-ralph-prompt, pr-train, project-lead |
-| Pull Requests — merge method, protection, labels, bots, risk tiers | pr-train, address-pr-comments, project-lead |
+| Local Environment — start command, how to verify each change type, shared or per-worktree, credential files | implementation-plan, create-ralph-prompt, pr-train, project-lead |
+| Pull Requests — merge method, protection, title format, labels, bots, risk tiers | pr-train, address-pr-comments, project-lead |
 | Autonomous Sessions — agent CLI, loop command, subagent budget, reference implementations, the agent's GitHub login | research-document, implementation-plan, create-ralph-prompt, address-pr-comments, project-lead |
 | Safety — production access, what a merge triggers, costly actions, secrets, shared resources, hard rules | project-lead |
 

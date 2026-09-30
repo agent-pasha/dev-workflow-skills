@@ -17,7 +17,7 @@ P1 to P17 are the patterns in [references/orchestration-patterns.md](references/
 
 This skill reads repo conventions from `.agents/workflow-context.md` at the git root. If that file is missing, or any section listed below is missing or still `TODO`, run the onboarding procedure in [references/onboarding.md](references/onboarding.md) first: infer from the repo, ask only what's left, write the file, then continue here.
 
-**Context it needs:** `Repository` (default branch, areas) · `Specs & Docs` (specs directory, docs to read first) · `Tickets, Branches, Commits` (tracker, branch and commit format, attribution) · `Gates` (per area, blocking set, CI/local drift) · `Local Environment` (start command, verify by change type, shared or per-worktree) · `Pull Requests` (merge method, protection, labels, risk tiers) · `Autonomous Sessions` (subagent budget) · `Safety` (production access, what a merge triggers, costly actions, secrets, shared resources, hard rules).
+**Context it needs:** `Repository` (default branch, worktree dir, areas) · `Specs & Docs` (specs directory, docs to read first) · `Tickets, Branches, Commits` (tracker, branch and commit format, attribution) · `Gates` (per area, blocking set, CI/local drift) · `Local Environment` (start command, verify by change type, shared or per-worktree, credential files) · `Pull Requests` (merge method, protection, title format, labels, risk tiers) · `Autonomous Sessions` (subagent budget) · `Safety` (production access, what a merge triggers, costly actions, secrets, shared resources, hard rules).
 
 Below, `specs/` means the context file's specs directory and `main` means its default branch.
 
@@ -105,7 +105,7 @@ The skill names capabilities, not tools. Use your harness's equivalent; where it
 
 Day one:
 
-1. Create the worktree: `git fetch -q origin && git worktree add -b <branch per the context file> <gitignored worktree dir>/<slug> origin/main`, and work in it with absolute paths. Copy local credential files into it only if an agent will run the local environment from it.
+1. Create the worktree: `git fetch -q origin && git worktree add -b <branch per the context file> <the context file's worktree dir>/<slug> origin/main`, and work in it with absolute paths. Handle credential files as the context file's `Credential files` says: when the start command generates them, never copy them in; otherwise copy them only if an agent will run the local environment from it.
 2. Start the project memory entry: a dated log of goals, decisions, hazards and standing authorizations, each with why and how to apply it.
 3. Read the ticket or project and any existing `specs/*-research.md` / `*-todo.md` for the topic. Check the installed skills and the docs the context file lists before re-deriving anything.
 4. Send the owner the problem statement with its evidence, the goals, constraints, hazards and definition of done as you understood them, with suspect facts flagged. The definition of done is phrased as the problem being solved, not as the artifacts being built.
@@ -192,7 +192,7 @@ Add the lines for the agent's role:
 - **Prove at each commit.** Fold each fix into its item and prove every item at its own commit in a fresh clone (P9). After any history rewrite, keep a backup branch and confirm the tip's tree is unchanged.
 - **Facts by scripts, prose by agents** (P14). A script places each item's "How tested" and refuses to open the PRs when a branch is not at its expected SHA.
 - **Name the surface.** Unit tests are not the local environment, the local environment is not a deployed one, and a deployed environment is not production. A result proven locally is "local only" until it runs further.
-- **List the fidelity gaps:** what the environment cannot test, such as a vendor with no fake or production data volumes. Raise them with the owner when the design is chosen, and name them in every PR's "How tested".
+- **List the fidelity gaps:** what the environment cannot test, such as a vendor with no fake or production data volumes. Raise them with the owner when the design is chosen, and name them in every PR: under "Not verified" where the repo's PR convention has that section, otherwise in "How tested".
 - **Stop on a security flag.** When the harness flags a subagent action as a possible policy violation, or an agent reports a destructive git command, check the branch tip, the remote, the other worktrees and the shared stash, and find the exact command, before building on the result.
 
 ## Outward actions and approval

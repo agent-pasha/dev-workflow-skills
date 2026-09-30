@@ -105,7 +105,7 @@ const synthesis = await agent(`${COMMON}\nYou are the SYNTHESIZER. Follow the sy
 return { areas: results.filter(Boolean), synthesis }
 ```
 
-Areas that query production use only the read-only access the context file's Safety section names. Re-verifying a weaker model's pass on the strongest model is worth it: verifiers catch confirmed-wrong commits, "corrected" right figures, and pasted secrets.
+Only one area may run heavy commands (the local environment, builds, end-to-end runs); the others read code and docs and run read-only queries, so parallel areas do not starve the machine or distort each other's numbers. Areas that query production use only the read-only access the context file's Safety section names. Re-verifying a weaker model's pass on the strongest model is worth it: verifiers catch confirmed-wrong commits, "corrected" right figures, and pasted secrets.
 
 ## P2. Research, verify, then a spike gated on the verified verdict
 
@@ -254,7 +254,8 @@ BRANCHES=<the list file>; BODIES=<the reviewed bodies>; base=<default branch>; p
 while read n b s labels; do
   [ "$(git rev-parse --short=8 "$b")" = "$s" ] || { echo "branch $b is not at $s"; exit 1; }
   git push -q origin "$b:refs/heads/$b" || exit 1
-  url=$(gh pr create --draft --base "$base" --head "$b" --title "$(cat "$BODIES/$n.title")" --body-file "$BODIES/$n.md" --label "$labels") || exit 1
+  label_args=(); [ -n "$labels" ] && label_args=(--label "$labels")
+  url=$(gh pr create --draft --base "$base" --head "$b" --title "$(cat "$BODIES/$n.title")" --body-file "$BODIES/$n.md" ${label_args[@]+"${label_args[@]}"}) || exit 1
   prs+=("$url"); base=$b
 done < "$BRANCHES"
 gh stack link "${prs[@]}"
