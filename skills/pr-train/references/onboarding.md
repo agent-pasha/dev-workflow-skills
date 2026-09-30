@@ -28,6 +28,7 @@ Do your best to fill every section from the repository before asking anything. U
 | **Local environment** | `docker-compose*.yml`, `Tiltfile`, `skaffold.yaml`, `devcontainer.json`, `Procfile`, `.env.example`, README "getting started" section |
 | **Pull requests** | `gh repo view --json nameWithOwner,defaultBranchRef,mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed,pullRequestTemplates`; `gh api repos/<slug> --jq '{allow_auto_merge, delete_branch_on_merge}'`; `gh api repos/<slug>/branches/<default>/protection` (may 403 — that's fine, record "unknown"); `gh label list`; `.github/PULL_REQUEST_TEMPLATE.md`; presence of bot reviewers in recent PRs (`gh pr view <n> --json reviews`) — Copilot, CodeRabbit, etc.; `.github/CODEOWNERS` |
 | **Risk tiers** | `CODEOWNERS` (required reviewers per path), paths containing `auth`, `payment`, `billing`, `migration`, `infra`, `terraform`, `.github`; paths named `experimental`, `sandbox`, `playground`, `skills` |
+| **Safety** | `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md` "never" and "do not" rules; deploy workflows (which branch pushes deploy where, whether production is `workflow_dispatch`); agent tool configs (`.mcp.json`, `.codex/config.toml`) naming production or read-only tools; gitignored credential files (`.env*`); policy docs under `docs/`; bot trigger handles that must never appear in text |
 | **Autonomous sessions** | Which agent CLIs are installed (`command -v claude codex opencode cursor-agent`); existing `specs/*-prompt.md` files; README mentions of loops |
 | **Reference implementations** | Directories named `legacy`, `old`, `v1`, `-java`, `-python` alongside a newer sibling; README migration notes |
 
@@ -59,6 +60,7 @@ Questions that commonly survive inference:
 4. Whether **AI-attribution trailers** (`Co-Authored-By: …`, `Generated with …`) are wanted in commits.
 5. Which **agent CLI** runs autonomous loops here, and the **subagent budget** the user is comfortable with.
 6. Whether an older **reference implementation** exists that research/plans should compare against.
+7. What agents may do in **production**, and which actions have **real-world cost or side effects** (outbound calls, emails, payments, paid APIs).
 
 Do not ask about anything the current skill will not use.
 
@@ -125,6 +127,7 @@ Then show the user a five-line summary of what was written and recommend committ
   | API endpoint | curl against localhost:8080, check status + body |
   | DB migration | migration job logs + `psql … -c "\d table"` |
   | UI | open localhost:3000, check console, screenshot light+dark |
+- Instances: one per worktree | one shared instance (only one agent drives it at a time)
 
 ## Pull Requests
 - Host: GitHub | GitLab
@@ -147,4 +150,14 @@ Then show the user a five-line summary of what was written and recommend committ
 - Subagent budget: 5 (simple) / 20 (large investigation)
 - Reference implementations: none | legacy/ (Java service being replaced by services/api)
 - Agent GitHub login: <login the agent replies as on PRs, from `gh api user --jq .login`; used to skip threads it already answered>
+
+## Safety
+- Production access: none | read-only via <tools>
+- A merge to the default branch: triggers nothing | deploys to <environment> and runs its migrations
+- Production deploys: manual via <workflow> | automatic on merge
+- Costly or real-world actions: none | <outbound calls, emails, payments, paid APIs>; test fixture: <safe target>
+- Secrets and sensitive data: <gitignored credential files>; never write out <PII, tokens, customer data>
+- Shared resources: none | <local cluster or database shared across worktrees>
+- Hard rules: none | <one line each, with the policy doc path>
+- Never-write strings: none | <bot trigger handles that must not appear in comments, commits or docs>
 ```

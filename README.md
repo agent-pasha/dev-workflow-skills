@@ -9,6 +9,7 @@ Agent skills for the loop that actually ships features: **research → plan → 
 | [`create-ralph-prompt`](skills/create-ralph-prompt/SKILL.md) | Writes a self-contained session prompt (plus a tracker for ad-hoc goals) for a one-task-per-session autonomous loop, and gives you the loop command. |
 | [`pr-train`](skills/pr-train/SKILL.md) | Splits a finished feature into <500-LOC PRs, writes high-signal descriptions, and can drive the whole train through review and merge — sequentially, or as a native [GitHub stacked PR](https://docs.github.com/en/pull-requests/get-started/stacked-prs-quickstart) chain via `gh stack` — with guardrails. |
 | [`address-pr-comments`](skills/address-pr-comments/SKILL.md) | Triages every unresolved review thread on a PR (CodeRabbit, Copilot, humans) against the code, specs, knowledge base, and conventions; fixes what's valid, dismisses noise with a cited reason, asks when unsure, replies and resolves threads, runs the gates, propagates up a stack. Runs interactively or from CI. |
+| [`project-lead`](skills/project-lead/SKILL.md) | Leads a large, multi-track project end to end: first-principles problem framing, research with a verifier per area, competing spikes, adversarial design review, parallel worktree build waves, integration with an independent verifier, a pre-push gate, and a PR train ready for review. Works in any harness, with a capability map for Claude Code and fallbacks for the rest. |
 | [`workflow-onboarding`](skills/workflow-onboarding/SKILL.md) | Runs the onboarding step on demand: infers your repo's conventions, asks only what's left, writes `.agents/workflow-context.md`. |
 
 ```mermaid
@@ -16,7 +17,7 @@ flowchart LR
     R[research-document] -->|specs/X-research.md| P[implementation-plan]
     P -->|specs/X-todo.md| C[create-ralph-prompt]
     C -->|specs/X-prompt.md| L[Unattended loop<br/>one task per session]
-    P -->|specs/X-todo.md| O[Fable orchestrates<br/>Opus subagents implement]
+    P -->|specs/X-todo.md| O[project-lead orchestrates<br/>subagents build, review, verify]
     L --> T[pr-train]
     O --> T
     T -->|review comments| A[address-pr-comments]
@@ -36,7 +37,7 @@ I built these to automate the parts of my daily work that kept hurting when hand
 - **PR descriptions that don't help.** On my team, an open PR carries an implicit claim: it was exercised on a complete local environment that mirrors production, not just unit-tested. The description has to say the purpose, where a reviewer should focus, and exactly how it was tested locally. That's what lets us trust generated code. Your team's bar may differ, which is what the onboarding step is for.
 - **Review-bot back-and-forth.** Every PR on my team gets a CodeRabbit review, and the signal-to-noise ratio varies a lot. `address-pr-comments` is my most-used skill: it triages each thread and grounds its verdict in the project's specs, knowledge base, and conventions instead of blindly accepting change requests, then replies and resolves the threads it settled. Once the bot comes back with zero new comments I do one final inspection myself and request review from the team, who then see a PR with the obvious wrinkles already handled. It also runs unattended: a CI job on my repos triggers the agent with this skill whenever new review comments land.
 
-**How I use them today.** I still start with `research-document` and `implementation-plan`, but I rarely run ralph loops any more. Instead I hand the finished plan to Claude Fable and let it orchestrate: Fable works through the plan with Opus subagents as implementors, deciding itself what can run in parallel and what has to be sequential. `create-ralph-prompt` stays in the collection for when a fully unattended loop is the right tool.
+**How I use them today.** I still start with `research-document` and `implementation-plan`, but I rarely run ralph loops any more. Instead I hand the finished plan to Claude Fable and let it orchestrate: Fable works through the plan with Opus subagents as implementors, deciding itself what can run in parallel and what has to be sequential. For projects bigger than one plan, `project-lead` is that orchestration written down: how the lead frames the problem, briefs and verifies its agents, keeps the owner in the loop, and gets a train of PRs to review without trusting any agent's report on its word. `create-ralph-prompt` stays in the collection for when a fully unattended loop is the right tool.
 
 ## Install (one command)
 
@@ -112,16 +113,18 @@ What the file captures:
 
 | Section | Used by |
 |---|---|
-| Repository — monorepo areas and paths | research-document, implementation-plan |
+| Repository — monorepo areas and paths | research-document, implementation-plan, project-lead |
 | Specs & Docs — where research/plans/prompts go, where decisions and the knowledge base live | all |
-| Tickets, Branches, Commits — key format, naming, trailers | pr-train, create-ralph-prompt, address-pr-comments |
-| Gates — build/test/lint/typecheck per area | pr-train, implementation-plan, create-ralph-prompt, address-pr-comments |
-| Local Environment — start command, how to verify each change type | implementation-plan, create-ralph-prompt, pr-train |
-| Pull Requests — merge method, protection, labels, bots, risk tiers | pr-train, address-pr-comments |
-| Autonomous Sessions — agent CLI, loop command, subagent budget, reference implementations, the agent's GitHub login | research-document, implementation-plan, create-ralph-prompt, address-pr-comments |
+| Tickets, Branches, Commits — key format, naming, trailers | pr-train, create-ralph-prompt, address-pr-comments, project-lead |
+| Gates — build/test/lint/typecheck per area | pr-train, implementation-plan, create-ralph-prompt, address-pr-comments, project-lead |
+| Local Environment — start command, how to verify each change type, shared or per-worktree | implementation-plan, create-ralph-prompt, pr-train, project-lead |
+| Pull Requests — merge method, protection, labels, bots, risk tiers | pr-train, address-pr-comments, project-lead |
+| Autonomous Sessions — agent CLI, loop command, subagent budget, reference implementations, the agent's GitHub login | research-document, implementation-plan, create-ralph-prompt, address-pr-comments, project-lead |
+| Safety — production access, what a merge triggers, costly actions, secrets, shared resources, hard rules | project-lead |
 
 ## Philosophy
 
+- **First principles before patterns.** Start from an evidenced problem, make every component beat a simpler alternative, follow best practices where their reason holds, and judge the result by whether it solves the problem, not by whether the plan's checks pass.
 - **Research before planning, plan before executing.** Every plan task points at real files and ends with a verification step. "It should work" is not verification.
 - **One task per session.** Autonomous loops restart with a fresh context for each task, so progress is incremental and reversible.
 - **Small PRs, paced.** Under 500 lines of meaningful diff, reviewable cold, one open at a time. A feature that needs 30 PRs gets 30 PRs — over time, not all at once.
@@ -133,7 +136,7 @@ What the file captures:
 - An agent that supports `SKILL.md` skills (Claude Code, Codex, Cursor, OpenCode, …).
 - `git`, and for `pr-train`: the [GitHub CLI](https://cli.github.com/) (`gh`).
 - For stacked PR chains, `pr-train` drives GitHub's native [stacked pull requests](https://docs.github.com/en/pull-requests/get-started/stacked-prs-quickstart) through the `gh stack` extension. Install it with `gh extension install github/gh-stack`, and consider adding a dedicated gh-stack skill so your agent knows the extension's non-interactive flags and conflict recovery; `pr-train` defers to it when present.
-- Subagent support in your agent makes `research-document` and `implementation-plan` much faster, but both fall back to sequential investigation.
+- Subagent support in your agent makes `research-document`, `implementation-plan` and `project-lead` much faster; all three fall back to sequential work without it.
 
 ## Contributing
 
