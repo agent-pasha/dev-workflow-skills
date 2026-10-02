@@ -1,6 +1,11 @@
 ---
 name: caffeinate
-description: Keep the Mac awake using macOS `caffeinate`, like the Amphetamine app. It works as a chat front end: show presets, the user says what they need in plain words, and Claude runs it. Use when the user says /caffeinate or asks to keep the Mac, screen or system awake: for a duration, until a set time, while an app, process or command runs, or with the lid closed. Also use to check what is keeping the Mac awake, or to stop keep-awake sessions.
+description: >
+  Keep the Mac awake using macOS `caffeinate`, like the Amphetamine app. It works as a chat front
+  end: show presets, the user says what they need in plain words, and Claude runs it. Use when the
+  user says /caffeinate or asks to keep the Mac, screen or system awake: for a duration, until a set
+  time, while an app, process or command runs, or with the lid closed. Also use to check what is
+  keeping the Mac awake, or to stop keep-awake sessions.
 ---
 
 # Caffeinate: Claude Edition
