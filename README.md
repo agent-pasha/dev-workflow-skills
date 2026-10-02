@@ -11,6 +11,7 @@ Agent skills for the loop that actually ships features: **research → plan → 
 | [`address-pr-comments`](skills/address-pr-comments/SKILL.md) | Triages every unresolved review thread on a PR (CodeRabbit, Copilot, humans) against the code, specs, knowledge base, and conventions; fixes what's valid, dismisses noise with a cited reason, asks when unsure, replies and resolves threads, runs the gates, propagates up a stack. Runs interactively or from CI. |
 | [`project-lead`](skills/project-lead/SKILL.md) | Leads a large, multi-track project end to end: first-principles problem framing, research with a verifier per area, competing spikes, adversarial design review, parallel worktree build waves, integration with an independent verifier, a pre-push gate, and a PR train ready for review. Works in any harness, with a capability map for Claude Code and fallbacks for the rest. |
 | [`conversation-artifact`](skills/conversation-artifact/SKILL.md) | Turns a Claude Code session into a shareable artifact page: every prompt and reply in order, decisions with the answers given, tool and subagent activity collapsed in between, and a prompt index. Finds the session by searching `~/.claude/projects` for text you quote, and always uses the same template. Standalone: needs no onboarding. |
+| [`caffeinate`](skills/caffeinate/SKILL.md) | Keeps your Mac awake like the Amphetamine app, as a chat front end: shows presets, you say what you need in plain words ("for 2 hours", "until 18:30", "while Zoom is open", "while `npm run build` runs", closed-lid mode), and it runs macOS `caffeinate`, tracks the sessions it started, and can show or stop them. Standalone: needs no onboarding. |
 | [`workflow-onboarding`](skills/workflow-onboarding/SKILL.md) | Runs the onboarding step on demand: infers your repo's conventions, asks only what's left, writes `.agents/workflow-context.md`. |
 
 ```mermaid
@@ -138,6 +139,7 @@ What the file captures:
 - `git`, and for `pr-train`: the [GitHub CLI](https://cli.github.com/) (`gh`).
 - For stacked PR chains, `pr-train` drives GitHub's native [stacked pull requests](https://docs.github.com/en/pull-requests/get-started/stacked-prs-quickstart) through the `gh stack` extension. Install it with `gh extension install github/gh-stack`, and consider adding a dedicated gh-stack skill so your agent knows the extension's non-interactive flags and conflict recovery; `pr-train` defers to it when present.
 - For `conversation-artifact`: `python3` and Node 18 or newer (its Markdown renderer is vendored), and an agent that can publish artifacts, such as Claude Code; without one it hands you the HTML file.
+- For `caffeinate`: macOS (it wraps the built-in `caffeinate` and `pmset`).
 - Subagent support in your agent makes `research-document`, `implementation-plan` and `project-lead` much faster; all three fall back to sequential work without it.
 
 ## Contributing
